@@ -1,4 +1,4 @@
 APScheduler
 tweepy
-google-cloud-language
 requests
+alpaca_trade_api
