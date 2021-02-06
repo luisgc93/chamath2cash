@@ -1,0 +1,4 @@
+APScheduler
+tweepy
+google-cloud-language
+requests
