@@ -2,3 +2,5 @@ APScheduler
 tweepy
 requests
 alpaca_trade_api
+sentry_sdk
+pytest
