@@ -13,8 +13,8 @@ def init_tweepy():
 def buy(ticker):
     api = tradeapi.REST(
         key_id=environ["APCA_API_KEY_ID"],
-        secret_key=environ["SECRET_KEY"],
-        base_url=environ["BASE_URL"]
+        secret_key=environ["APCA_SECRET_KEY"],
+        base_url=environ["APCA_BASE_URL"]
     )
 
     api.submit_order(
@@ -29,8 +29,8 @@ def buy(ticker):
 def sell(ticker):
     api = tradeapi.REST(
         key_id=environ["APCA_API_KEY_ID"],
-        secret_key=environ["SECRET_KEY"],
-        base_url=environ["BASE_URL"]
+        secret_key=environ["APCA_SECRET_KEY"],
+        base_url=environ["APCA_BASE_URL"]
     )
 
     api.submit_order(
