@@ -44,7 +44,7 @@ def sell(ticker):
 
 def run():
     api = init_tweepy()
-    statuses = api.user_timeline(screen_name="chamath")
+    statuses = api.user_timeline(screen_name="chamath", count=1)
     json_tweets = [status._json for status in statuses if status.in_reply_to_status_id is None]
     text = json_tweets[0]["text"]
     stocks = get_stocks(text)
