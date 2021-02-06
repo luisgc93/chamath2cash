@@ -1,3 +1,4 @@
+import logging
 import re
 from datetime import datetime, timedelta
 from os import environ
@@ -7,8 +8,11 @@ import alpaca_trade_api as tradeapi
 
 from .constants import CASHTAG, CHAMATH_TW_ID
 
+logger = logging.getLogger(__name__)
+
 
 def init_tweepy():
+    logger.info("Initialising tweepy client")
     auth = tweepy.OAuthHandler(environ["CONSUMER_KEY"], environ["CONSUMER_SECRET"])
     auth.set_access_token(environ["ACCESS_TOKEN"], environ["ACCESS_TOKEN_SECRET"])
     return tweepy.API(auth)
