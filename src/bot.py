@@ -31,7 +31,8 @@ def run():
             continue
         for stock in stocks:
             if datetime.now() - timedelta(minutes=2) <= status.created_at:
-                api.update_status(status=f"Buying ${stock} 🚀")
+                original_tweet_url = f"https://twitter.com/chamath/status/{status.id}"
+                api.update_status(status=f"Buying ${stock} 🚀 {original_tweet_url}")
                 init_alpaca().submit_order(
                     symbol=stock,
                     qty=1,
