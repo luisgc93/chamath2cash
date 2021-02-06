@@ -5,7 +5,7 @@ from os import environ
 import tweepy
 import alpaca_trade_api as tradeapi
 
-from constants import CASHTAG, CHAMATH_TW_ID
+from .constants import CASHTAG, CHAMATH_TW_ID
 
 
 def init_tweepy():
