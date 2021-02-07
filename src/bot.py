@@ -6,9 +6,10 @@ from os import environ
 import tweepy
 import alpaca_trade_api as tradeapi
 
+from .logger import Logger
 from .constants import CASHTAG, CHAMATH_TW_ID
 
-logger = logging.getLogger(__name__)
+logger = Logger()
 
 
 def init_tweepy():
