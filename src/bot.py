@@ -38,6 +38,7 @@ def tweet_portfolio_value():
 
 def run():
     api = init_tweepy()
+    tweet_portfolio_value()
     statuses = api.user_timeline(user_id=CHAMATH_TW_ID, count=5)
     for status in statuses:
         stocks = get_stocks(status.text)
