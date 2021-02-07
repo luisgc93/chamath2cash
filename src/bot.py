@@ -24,7 +24,15 @@ def init_alpaca():
     return tradeapi.REST(
         key_id=environ["APCA_API_KEY_ID"],
         secret_key=environ["APCA_SECRET_KEY"],
-        base_url=environ["APCA_BASE_URL"]
+        base_url=environ["APCA_BASE_URL"],
+    )
+
+
+def tweet_portfolio_value():
+    client = init_alpaca()
+    account = client.get_account()
+    init_tweepy().update_status(
+        status=f"My current portfolio value is: ${'{:,.2f}'.format(float(account.portfolio_value))}"
     )
 
 
@@ -40,14 +48,12 @@ def run():
                 original_tweet_url = f"https://twitter.com/chamath/status/{status.id}"
                 api.update_status(status=f"Buying ${stock} 🚀 {original_tweet_url}")
                 init_alpaca().submit_order(
-                    symbol=stock,
-                    qty=1,
-                    side='buy',
-                    type='market',
-                    time_in_force='gtc'
+                    symbol=stock, qty=1, side="buy", type="market", time_in_force="gtc"
                 )
 
 
 def get_stocks(tweet):
     if CASHTAG in tweet:
-        return re.findall(r"[$][A-Za-z]*", tweet)
+        return list(
+            set([ticker.strip("$") for ticker in re.findall(r"[$][A-Za-z]*", tweet)])
+        )
