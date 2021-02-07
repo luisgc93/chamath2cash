@@ -1,6 +1,8 @@
 APScheduler
+alpaca_trade_api
+black
+flake8
 tweepy
 requests
-alpaca_trade_api
 sentry_sdk
 pytest
