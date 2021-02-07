@@ -38,7 +38,6 @@ def tweet_portfolio_value():
 
 def run():
     api = init_tweepy()
-    tweet_portfolio_value()
     statuses = api.user_timeline(user_id=CHAMATH_TW_ID, count=5)
     for status in statuses:
         stocks = get_stocks(status.text)
@@ -51,6 +50,7 @@ def run():
                 init_alpaca().submit_order(
                     symbol=stock, qty=1, side="buy", type="market", time_in_force="gtc"
                 )
+                tweet_portfolio_value()
 
 
 def get_stocks(tweet):
