@@ -1,7 +1,4 @@
-from unittest.mock import call
-
 import pytest
-from src import bot
 
 
 class TestBot:
@@ -26,21 +23,15 @@ class TestBot:
         ],
     )
     def test_returns_stock_tickers_when_tweet_contains_stocks(
-        self, tweet, stock_tickers
+        self, bot, tweet, stock_tickers
     ):
 
         assert bot.get_stocks(tweet) == stock_tickers
 
     @pytest.mark.usefixtures("mock_get_account")
-    def test_publishes_current_portfolio_value(
-        self, mock_tweepy_client,
+    def test_returns_current_portfolio_value(
+        self,
+        bot,
     ):
-        expected_call = [
-            call().update_status(
-                status="My current portfolio value is: $100,000.00"
-            ),
-        ]
 
-        bot.tweet_portfolio_value()
-
-        assert expected_call in mock_tweepy_client.mock_calls
+        assert bot.get_portfolio_value() == "$100,000.00"

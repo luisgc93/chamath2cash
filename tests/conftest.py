@@ -1,28 +1,14 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock
 
 import pytest
 from alpaca_trade_api.entity import Account
 
-
-@pytest.fixture(autouse=True)
-def mock_env_variables(monkeypatch):
-    monkeypatch.setenv("CONSUMER_KEY", "123")
-    monkeypatch.setenv("CONSUMER_SECRET", "123")
-    monkeypatch.setenv("ACCESS_TOKEN", "123")
-    monkeypatch.setenv("ACCESS_TOKEN_SECRET", "123")
-    monkeypatch.setenv("BOT_USER_ID", "123")
+from src.bot import Bot
 
 
 @pytest.fixture(autouse=True)
-def mock_tweepy_client():
-    with patch("src.bot.init_tweepy") as mock:
-        yield mock
-
-
-@pytest.fixture(autouse=True)
-def mock_alpaca_client():
-    with patch("src.bot.init_alpaca") as mock:
-        yield mock
+def bot():
+    return Bot(twitter_client=MagicMock(), broker=MagicMock())
 
 
 @pytest.fixture()
@@ -52,6 +38,6 @@ def account():
 
 
 @pytest.fixture
-def mock_get_account(mock_alpaca_client, account):
-    mock_alpaca_client.return_value.get_account.return_value = account
-    return mock_alpaca_client
+def mock_get_account(bot, account):
+    bot.broker.get_account.return_value = account
+    yield bot

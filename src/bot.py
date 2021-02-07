@@ -1,60 +1,77 @@
 import logging
 import re
-import sys
 from datetime import datetime, timedelta
 from os import environ
+from typing import List
 
-import tweepy
-import alpaca_trade_api as tradeapi
+from tweepy import Status
 
+from .broker import AlpacaClient
+from .twitter import TwitterClient
 from .constants import CASHTAG, CHAMATH_TW_ID
 
 logger = logging.getLogger(__name__)
 
 
-def init_tweepy():
-    logger.info("Initialising tweepy client")
-    sys.stdout.flush()
-    auth = tweepy.OAuthHandler(environ["CONSUMER_KEY"], environ["CONSUMER_SECRET"])
-    auth.set_access_token(environ["ACCESS_TOKEN"], environ["ACCESS_TOKEN_SECRET"])
-    return tweepy.API(auth)
+class Bot:
+    def __init__(self, twitter_client, broker):
+        self.twitter = twitter_client
+        self.broker = broker
 
+    def get_new_tweets(self) -> List[Status]:
+        statuses = self.twitter.api.user_timeline(user_id=CHAMATH_TW_ID, count=5)
+        return [status for status in statuses if self._is_recent(status)]
 
-def init_alpaca():
-    return tradeapi.REST(
-        key_id=environ["APCA_API_KEY_ID"],
-        secret_key=environ["APCA_SECRET_KEY"],
-        base_url=environ["APCA_BASE_URL"],
-    )
+    def _is_recent(self, status) -> bool:
+        return datetime.now() - timedelta(minutes=2) <= status.created_at
 
+    def tweet(self, status):
+        self.twitter.api.update_status(status=status)
 
-def tweet_portfolio_value():
-    client = init_alpaca()
-    account = client.get_account()
-    init_tweepy().update_status(
-        status=f"My current portfolio value is: ${'{:,.2f}'.format(float(account.portfolio_value))}"
-    )
+    def get_stocks(self, tweet):
+        if CASHTAG in tweet:
+            return list(
+                set(
+                    [ticker.strip("$") for ticker in re.findall(r"[$][A-Za-z]*", tweet)]
+                )
+            )
+
+    def get_portfolio_value(self) -> str:
+        return "${:,.2f}".format(float(self.broker.get_account().portfolio_value))
+
+    def buy(self, ticker, amount) -> None:
+        self.broker.api.submit_order(
+            symbol=ticker, qty=amount, side="buy", type="market", time_in_force="gtc"
+        )
+
+    def sell(self, ticker, amount) -> None:
+        self.broker.api.submit_order(
+            symbol=ticker, qty=amount, side="sell", type="market", time_in_force="gtc"
+        )
 
 
 def run():
-    api = init_tweepy()
-    statuses = api.user_timeline(user_id=CHAMATH_TW_ID, count=5)
+    twitter_client = TwitterClient(
+        environ["CONSUMER_KEY"],
+        environ["CONSUMER_SECRET"],
+        environ["ACCESS_TOKEN"],
+        environ["ACCESS_TOKEN_SECRET"],
+    )
+    broker = AlpacaClient(
+        environ["APCA_API_KEY_ID"], environ["APCA_SECRET_KEY"], environ["APCA_BASE_URL"]
+    )
+    bot = Bot(twitter_client, broker)
+
+    statuses = bot.twitter.get_tweets()
     for status in statuses:
-        stocks = get_stocks(status.text)
+        stocks = bot.get_stocks(status.text)
         if not stocks:
             continue
         for stock in stocks:
-            if datetime.now() - timedelta(minutes=2) <= status.created_at:
-                original_tweet_url = f"https://twitter.com/chamath/status/{status.id}"
-                api.update_status(status=f"Buying ${stock} 🚀 {original_tweet_url}")
-                init_alpaca().submit_order(
-                    symbol=stock, qty=1, side="buy", type="market", time_in_force="gtc"
-                )
-                tweet_portfolio_value()
-
-
-def get_stocks(tweet):
-    if CASHTAG in tweet:
-        return list(
-            set([ticker.strip("$") for ticker in re.findall(r"[$][A-Za-z]*", tweet)])
-        )
+            bot.buy(stock, 1)
+            original_tweet_url = f" https://twitter.com/chamath/status/{status.id}"
+            portfolio = bot.get_portfolio_value()
+            bot.tweet(
+                f"Buying ${stock} 🚀. Current portfolio value: {portfolio} "
+                f"{original_tweet_url}"
+            )
