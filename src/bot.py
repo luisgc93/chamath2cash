@@ -1,5 +1,6 @@
 import logging
 import re
+import sys
 from datetime import datetime, timedelta
 from os import environ
 
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 def init_tweepy():
     logger.info("Initialising tweepy client")
+    sys.stdout.flush()
     auth = tweepy.OAuthHandler(environ["CONSUMER_KEY"], environ["CONSUMER_SECRET"])
     auth.set_access_token(environ["ACCESS_TOKEN"], environ["ACCESS_TOKEN_SECRET"])
     return tweepy.API(auth)
