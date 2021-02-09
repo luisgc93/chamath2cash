@@ -62,7 +62,7 @@ def run():
     )
     bot = Bot(twitter_client, broker)
 
-    statuses = bot.twitter.get_new_tweets()
+    statuses = bot.get_new_tweets()
     for status in statuses:
         stocks = bot.get_stocks(status.text)
         if not stocks:
