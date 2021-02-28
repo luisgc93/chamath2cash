@@ -9,7 +9,7 @@ sentry_sdk.init(environ["SENTRY_PROJECT_URL"], traces_sample_rate=1.0)
 sched = BlockingScheduler()
 
 
-@sched.scheduled_job("interval", minutes=2)
+@sched.scheduled_job("interval", days=7)
 def timed_job():
     bot.run()
 
